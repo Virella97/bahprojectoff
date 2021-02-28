@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.bah.project.authservice.domain.Customer;
 import com.bah.project.authservice.domain.Token;
+import com.bah.project.authservice.service.JwtUtil;
 
 
 @RestController
@@ -21,10 +22,14 @@ public class AuthController {
 	@Autowired
 	private RestTemplate restTemplate;
 	
+	@Autowired
+	private JwtUtil jwtUtil;
+	
 	private static Logger log = LoggerFactory.getLogger(AuthController.class);
 	
 	
 	// WORKS WITH CLIENT
+	
 	@PostMapping("/register")
 	public ResponseEntity<Customer> registerCustomer(@RequestBody Customer customer){
 	
@@ -36,10 +41,14 @@ public class AuthController {
 	}
 	
 	
+	// WORKS WITH CLIENT
+	
 	@PostMapping("/token")
 	public ResponseEntity<Token> getToken(@RequestBody Customer customer){
 	
-		Token token =  new Token("Im a Token");
+		// ADD LOGIC TO VERIFY CUSTOMER IN DB
+		
+		Token token = jwtUtil.createToken(null); // param scopes
 		
 		return ResponseEntity.ok(token);
 	}
