@@ -55,10 +55,14 @@ public class JwtUtil {
 		try { 
 			  Algorithm algorithm = Algorithm.HMAC256("secret"); 
 			  JWTVerifier verifier = JWT.require(algorithm).withIssuer("me@me.com") .build(); 
-			  //Reusable verifier instance DecodedJWT
-			  //jwt = verifier.verify(token); 
-			  //return jwt.getClaims(); 
-			  return null;
+			  //Reusable verifier instance 
+			  DecodedJWT jwt = verifier.verify(token); 
+			  
+			  // TODO Fix  
+			  // return null;
+			  
+			  return jwt.getClaims();
+			  
 		} catch (JWTVerificationException exception){
 				  return null; } 
 		}
@@ -68,10 +72,14 @@ public class JwtUtil {
 		  try { 
 			  Algorithm algorithm = Algorithm.HMAC256("secret"); 
 			  JWTVerifier verifier = JWT.require(algorithm).withIssuer("me@me.com") .build(); 
-			  //Reusable verifier instance DecodedJWT
-			  //jwt = verifier.verify(token); 
-			  //return jwt.getClaim("scopes").asString(); 
-			  return null;
+			  //Reusable verifier instance 
+			  DecodedJWT jwt = verifier.verify(token); 
+			  
+			  // TODO Fix 
+			  // return null;
+			  
+			  return jwt.getClaim("scopes").asString(); 
+			  
 		  } catch (JWTVerificationException exception){ 
 		  return null; 
 		  }
