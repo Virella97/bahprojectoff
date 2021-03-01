@@ -64,8 +64,8 @@ public class AuthController {
 
 			// TODO set scopes (Causing failed login)
 			
-			String scopes = "com.bah.project.dataservice.controller";
-			// String scopes = null;
+			// String scopes = "ALL";
+			String scopes = null;
 			Token token = jwtUtil.createToken(scopes); 
 			
 			return ResponseEntity.ok(token);
