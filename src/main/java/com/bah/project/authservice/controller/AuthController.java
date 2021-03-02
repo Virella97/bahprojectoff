@@ -39,76 +39,57 @@ public class AuthController {
 	
 		log.debug("Auth Controller - Register new Customer method - received customer: {}", customer);
 		
-		restTemplate.postForObject("http://localhost:8080/api/customers", customer, ResponseEntity.class);
+		
+		//Create APIToken to call DataService
+		Token apiToken = jwtUtil.createToken("API_TOKEN");
+		log.debug("Auth Controller - API_TOKEN generate: {}", apiToken.getToken());
+
+		// Add Token to Header
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("authorization", "Bearer " + apiToken.getToken().toString());
+		HttpEntity<?> entity = new HttpEntity<>(customer, headers);
+		
+		
+		restTemplate.postForObject("http://localhost:8080/api/customers", entity, ResponseEntity.class);
 		
 		return ResponseEntity.ok(customer);
 	}
 	
 	
-	// WORKS WITH CLIENT
-	
 	@PostMapping("/token")
 	public ResponseEntity<?> getToken(@RequestBody Customer customer){
-	
-		// ADD LOGIC TO VERIFY CUSTOMER IN DB
-		
-		log.debug("Auth Controller - Get Token for Customer method - received customer: {}", customer);
-		log.debug("Auth Controller - Get Token for Customer method - received name: {}", customer.getName());
-		log.debug("Auth Controller - Get Token for Customer method - received password: {}", customer.getPassword());
-		
-		// check for customer in db
+
 		String username = customer.getName();
+		String url = "http://localhost:8080/api/customers/byname/{username}"; 
 		
-		//Create APIToken
-		
+		//Create APIToken to call DataService
 		Token apiToken = jwtUtil.createToken("API_TOKEN");
-		
 		log.debug("Auth Controller - API_TOKEN generate: {}", apiToken.getToken());
-		
-		// OLD REQUEST
-		// Customer customerDetails = restTemplate.postForObject("http://localhost:8080/api/customers/byname", username, Customer.class);
-		// ResponseEntity<Customer> customerDetailsResponse = restTemplate.exchange(url, HttpMethod.POST, entity, Customer.class);
-		// ResponseEntity<Customer> customerDetailsResponse = restTemplate.postForEntity(url, entity, Customer.class);
-		
-		String url = "http://localhost:8080/api/customers/byname"; 
-		
+
 		// Add Token to Header
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("authorization", "Bearer " + apiToken.getToken().toString());
-		
-		HttpEntity<String> entity = new HttpEntity<>(username, headers);
+		HttpEntity<String> entity = new HttpEntity<>(headers);
 
 		// attached header to resttemplate request
+		// Customer customerDetails = restTemplate.postForObject(url, entity, Customer.class);
 		
-		Customer customerDetails = restTemplate.postForObject(url, entity, Customer.class);
+		ResponseEntity<Customer> customerDetailsResponse = restTemplate.exchange(url, HttpMethod.GET, entity, Customer.class, username);
 		
+		Customer customerDetails = customerDetailsResponse.getBody();
 		
-		// log.debug("Auth Controller - Get Token for Customer method - received customerDetailsResponse: {}", customerDetailsResponse);
-		
-		// Customer customerDetails = customerDetailsResponse.getBody();
-		
-		
-		log.debug("Auth Controller - Get Token for Customer method - received customerDetails: {}", customerDetails);
+		// log.debug("Auth Controller - Get Token for Customer method - received customerDetails: {}", customerDetails);
 		
 		// if in DB create and return token
 		if(customer.getName().equals(customerDetails.getName()) && customer.getPassword().equals(customerDetails.getPassword())) {
 
-			// TODO set scopes (Causing failed login)
-			
 			String scopes = "scope: [\"AUTH\"], scope:[\"com.api.customer.r\"]"; 
-			//String scopes = null;
 			Token token = jwtUtil.createToken(scopes); 
-			
 			log.debug("Auth Controller - Returning Token - token: {}", token);
-			
 			return ResponseEntity.ok(token);
-
-			
 		}
 		// otherwise return UNAUTHORIZED
 		
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 	}
-	
-	
 }
