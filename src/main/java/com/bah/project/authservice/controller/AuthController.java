@@ -3,6 +3,9 @@ package com.bah.project.authservice.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,7 +58,35 @@ public class AuthController {
 		
 		// check for customer in db
 		String username = customer.getName();
-		Customer customerDetails = restTemplate.postForObject("http://localhost:8080/api/customers/byname", username, Customer.class);
+		
+		//Create APIToken
+		
+		Token apiToken = jwtUtil.createToken("API_TOKEN");
+		
+		log.debug("Auth Controller - API_TOKEN generate: {}", apiToken.getToken());
+		
+		// OLD REQUEST
+		// Customer customerDetails = restTemplate.postForObject("http://localhost:8080/api/customers/byname", username, Customer.class);
+		// ResponseEntity<Customer> customerDetailsResponse = restTemplate.exchange(url, HttpMethod.POST, entity, Customer.class);
+		// ResponseEntity<Customer> customerDetailsResponse = restTemplate.postForEntity(url, entity, Customer.class);
+		
+		String url = "http://localhost:8080/api/customers/byname"; 
+		
+		// Add Token to Header
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("authorization", "Bearer " + apiToken.getToken().toString());
+		
+		HttpEntity<String> entity = new HttpEntity<>(username, headers);
+
+		// attached header to resttemplate request
+		
+		Customer customerDetails = restTemplate.postForObject(url, entity, Customer.class);
+		
+		
+		// log.debug("Auth Controller - Get Token for Customer method - received customerDetailsResponse: {}", customerDetailsResponse);
+		
+		// Customer customerDetails = customerDetailsResponse.getBody();
+		
 		
 		log.debug("Auth Controller - Get Token for Customer method - received customerDetails: {}", customerDetails);
 		
@@ -64,9 +95,11 @@ public class AuthController {
 
 			// TODO set scopes (Causing failed login)
 			
-			// String scopes = "ALL";
-			String scopes = null;
+			String scopes = "scope: [\"AUTH\"], scope:[\"com.api.customer.r\"]"; 
+			//String scopes = null;
 			Token token = jwtUtil.createToken(scopes); 
+			
+			log.debug("Auth Controller - Returning Token - token: {}", token);
 			
 			return ResponseEntity.ok(token);
 
