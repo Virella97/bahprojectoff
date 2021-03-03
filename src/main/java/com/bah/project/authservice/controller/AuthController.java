@@ -1,5 +1,7 @@
 package com.bah.project.authservice.controller;
 
+import java.net.URL;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +34,7 @@ public class AuthController {
 	private static Logger log = LoggerFactory.getLogger(AuthController.class);
 	
 	
-	// to support dockerization
-	private final String apiHost = System.getenv("API_HOST"); 
-	
+
 		
 	@PostMapping("/register")
 	public ResponseEntity<Customer> registerCustomer(@RequestBody Customer customer){
@@ -51,10 +51,19 @@ public class AuthController {
 		headers.set("authorization", "Bearer " + apiToken.getToken().toString());
 		HttpEntity<?> entity = new HttpEntity<>(customer, headers);
 		
+		String apiHost = System.getenv("API_HOST"); 
+	
+		String activeUrl = "";
 		
-		restTemplate.postForObject(apiHost + "/api/customers", entity, ResponseEntity.class);
+		if(apiHost == null) {
+			 activeUrl = "http://localhost:8080/api/customers";
+		}else {
+			activeUrl = "http://" + apiHost  + "/api/customers";
+		}
 		
+		restTemplate.postForObject(activeUrl, entity, ResponseEntity.class);
 		return ResponseEntity.ok(customer);
+
 	}
 	
 	
@@ -72,7 +81,18 @@ public class AuthController {
 		headers.set("authorization", "Bearer " + apiToken.getToken().toString());
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 
-		ResponseEntity<Customer> customerDetailsResponse = restTemplate.exchange(apiHost + "/customers/byname/{username}", HttpMethod.GET, entity, Customer.class, username);
+		String apiHost = System.getenv("API_HOST"); 
+	
+		String activeUrl = "";
+		
+		if(apiHost == null) {
+			 activeUrl = "http://localhost:8080/api/customers/byname/{username}";
+		}else {
+			activeUrl = "http://localhost:8080/api/customers/byname/{username}";
+			//activeUrl = "http://" + apiHost  + "/api/customers/byname/{username}";
+		}
+		
+		ResponseEntity<Customer> customerDetailsResponse = restTemplate.exchange(activeUrl, HttpMethod.GET, entity, Customer.class, username);
 		
 		Customer customerDetails = customerDetailsResponse.getBody();
 		
