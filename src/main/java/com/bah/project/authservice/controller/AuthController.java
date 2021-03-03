@@ -31,9 +31,9 @@ public class AuthController {
 	
 	private static Logger log = LoggerFactory.getLogger(AuthController.class);
 	
+	private final String apiHost = System.getenv("API_HOST"); 
 	
-	// WORKS WITH CLIENT
-	
+		
 	@PostMapping("/register")
 	public ResponseEntity<Customer> registerCustomer(@RequestBody Customer customer){
 	
@@ -50,7 +50,7 @@ public class AuthController {
 		HttpEntity<?> entity = new HttpEntity<>(customer, headers);
 		
 		
-		restTemplate.postForObject("http://localhost:8080/api/customers", entity, ResponseEntity.class);
+		restTemplate.postForObject(apiHost + "/api/customers", entity, ResponseEntity.class);
 		
 		return ResponseEntity.ok(customer);
 	}
@@ -60,7 +60,6 @@ public class AuthController {
 	public ResponseEntity<?> getToken(@RequestBody Customer customer){
 
 		String username = customer.getName();
-		String url = "http://localhost:8080/api/customers/byname/{username}"; 
 		
 		//Create APIToken to call DataService
 		Token apiToken = jwtUtil.createToken("API_TOKEN");
@@ -71,10 +70,7 @@ public class AuthController {
 		headers.set("authorization", "Bearer " + apiToken.getToken().toString());
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 
-		// attached header to resttemplate request
-		// Customer customerDetails = restTemplate.postForObject(url, entity, Customer.class);
-		
-		ResponseEntity<Customer> customerDetailsResponse = restTemplate.exchange(url, HttpMethod.GET, entity, Customer.class, username);
+		ResponseEntity<Customer> customerDetailsResponse = restTemplate.exchange(apiHost + "/customers/byname/{username}", HttpMethod.GET, entity, Customer.class, username);
 		
 		Customer customerDetails = customerDetailsResponse.getBody();
 		
