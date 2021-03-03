@@ -31,6 +31,8 @@ public class AuthController {
 	
 	private static Logger log = LoggerFactory.getLogger(AuthController.class);
 	
+	
+	// to support dockerization
 	private final String apiHost = System.getenv("API_HOST"); 
 	
 		
