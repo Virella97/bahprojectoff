@@ -88,8 +88,8 @@ public class AuthController {
 		if(apiHost == null) {
 			 activeUrl = "http://localhost:8080/api/customers/byname/{username}";
 		}else {
-			activeUrl = "http://localhost:8080/api/customers/byname/{username}";
-			//activeUrl = "http://" + apiHost  + "/api/customers/byname/{username}";
+			activeUrl = "http://" + apiHost  + "/api/customers/byname/{username}";
+
 		}
 		
 		ResponseEntity<Customer> customerDetailsResponse = restTemplate.exchange(activeUrl, HttpMethod.GET, entity, Customer.class, username);
