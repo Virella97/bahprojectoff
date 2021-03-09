@@ -5,6 +5,7 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,11 +21,18 @@ import com.bah.project.authservice.domain.Customer;
 import com.bah.project.authservice.domain.Token;
 import com.bah.project.authservice.service.JwtUtil;
 
+import io.jaegertracing.Configuration;
+import io.jaegertracing.internal.JaegerTracer;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+
 
 @RestController
-@RequestMapping("/account")
 public class AuthController {
 
+    @Autowired
+    private Tracer tracer;
+	
 	@Autowired
 	private RestTemplate restTemplate;
 	
@@ -56,13 +64,19 @@ public class AuthController {
 		String activeUrl = "";
 		
 		if(apiHost == null) {
-			 activeUrl = "http://localhost:8080/api/customers";
+			 activeUrl = "http://localhost:8090/api/customers";
 		}else {
 			activeUrl = "http://" + apiHost  + "/api/customers";
 		}
-		
+
+
+        Span span = tracer.buildSpan("register user").start();
+		span.setTag("http.status_code", 201);
 		restTemplate.postForObject(activeUrl, entity, ResponseEntity.class);
+		span.finish();
 		return ResponseEntity.ok(customer);
+		
+		
 
 	}
 	
@@ -86,7 +100,7 @@ public class AuthController {
 		String activeUrl = "";
 		
 		if(apiHost == null) {
-			 activeUrl = "http://localhost:8080/api/customers/byname/{username}";
+			 activeUrl = "http://localhost:8090/api/customers/byname/{username}";
 		}else {
 			activeUrl = "http://" + apiHost  + "/api/customers/byname/{username}";
 
@@ -104,7 +118,19 @@ public class AuthController {
 			String scopes = "scope: [\"AUTH\"], scope:[\"com.api.customer.r\"]"; 
 			Token token = jwtUtil.createToken(scopes); 
 			log.debug("Auth Controller - Returning Token - token: {}", token);
+			
+			
+			// return ResponseEntity.ok(token);
+			
+	        Span span = tracer.buildSpan("register user").start();
+			span.setTag("http.status_code", 200);
+
+			span.finish();
 			return ResponseEntity.ok(token);
+			
+			
+			
+			
 		}
 		// otherwise return UNAUTHORIZED
 		
