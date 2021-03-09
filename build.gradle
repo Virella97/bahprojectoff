@@ -26,6 +26,9 @@ dependencies {
 
 	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	
+	testCompile 'org.junit.jupiter:junit-jupiter-api'
+	testRuntime 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 test {

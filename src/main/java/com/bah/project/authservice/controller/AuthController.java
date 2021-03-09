@@ -28,6 +28,7 @@ import io.opentracing.Tracer;
 
 
 @RestController
+@RequestMapping("/account")
 public class AuthController {
 
     @Autowired
